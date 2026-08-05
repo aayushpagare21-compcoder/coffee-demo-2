@@ -21,23 +21,28 @@
  * ==========================================================================
  */
 
-/* TODO: replace with the real inline CSS (e.g. the anti-flicker rule). */
-const STYLE_CONTENT = `
-/* TODO: paste the real anti-flicker / snippet CSS here. */
-/* Example shape:  .opti-hide { opacity: 0 !important; }               */
-`;
+/*
+ * Anti-flicker rule: hide <body> until the edge script has applied its
+ * variant, so visitors never see the control paint first.
+ *
+ * The <style> tag carrying this MUST keep id="__opti_af" -- the inline script
+ * below removes it by that exact id. Rename it and the page stays blank.
+ */
+const STYLE_CONTENT = `body{opacity:0!important}`;
 
-/* TODO: replace with the real inline bootstrap script (no <script> tags). */
-const INLINE_SCRIPT_CONTENT = `
-/* TODO: paste the real inline snippet JS here. */
-/* It runs synchronously, before <body> is parsed. */
-`;
+/*
+ * Inline bootstrap. Runs synchronously, before <body> is parsed:
+ *   - stubs window.optimeleon + window.__opti_capture so calls made before
+ *     the async bundles land are queued instead of thrown away,
+ *   - drops the anti-flicker <style> after 300ms as a failsafe, in case the
+ *     edge script is slow or never arrives.
+ */
+const INLINE_SCRIPT_CONTENT = `window.optimeleon=window.optimeleon||function(){(optimeleon.q=optimeleon.q||[]).push(arguments);return{ok:true,verb:String(arguments[0]||''),error:'queued'}};window.__opti_bus="__opti_capture";window.__opti_capture=window.__opti_capture||function(){(__opti_capture.q=__opti_capture.q||[]).push(arguments)};setTimeout(function(){var s=document.getElementById('__opti_af');if(s)s.remove()},300);`;
 
-/* TODO: replace with the real first async script URL. */
-const SCRIPT_SRC_1 = "/opti-snippet-placeholder-1.js";
+/* Optimeleon edge bundles (staging), site key 3EdkB0S5YJT3. */
+const SCRIPT_SRC_1 = "https://edge-staging.optimeleon.com/b/3EdkB0S5YJT3.js";
 
-/* TODO: replace with the real second async script URL. */
-const SCRIPT_SRC_2 = "/opti-snippet-placeholder-2.js";
+const SCRIPT_SRC_2 = "https://edge-staging.optimeleon.com/c/3EdkB0S5YJT3.js";
 
 /*
  * Why `itemProp` is on the two async tags
@@ -55,8 +60,8 @@ const SCRIPT_SRC_2 = "/opti-snippet-placeholder-2.js";
  * itself is inert microdata: there is no itemScope on this document.
  *
  * Verified against the built HTML; if you upgrade React, re-check that
- * `#opti-snippet-style` still precedes `#opti-snippet-inline`, which still
- * precedes `#opti-snippet-async-1`.
+ * `#__opti_af` still precedes `#opti-snippet-inline`, which still precedes
+ * `#opti-snippet-async-1`.
  *
  * NOTE on absolute position: Next.js flushes its own framework tags (the
  * stylesheet <link>, image preloads and the bundle's own async chunks) into
@@ -69,9 +74,9 @@ const SCRIPT_SRC_2 = "/opti-snippet-placeholder-2.js";
 export default function OptiSnippet() {
   return (
     <>
-      {/* 1. inline <style> */}
+      {/* 1. inline <style> -- id is load-bearing, see STYLE_CONTENT above */}
       <style
-        id="opti-snippet-style"
+        id="__opti_af"
         dangerouslySetInnerHTML={{ __html: STYLE_CONTENT }}
       />
 
