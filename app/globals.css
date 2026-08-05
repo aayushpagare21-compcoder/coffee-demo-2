@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+/*
+ * opti-demo-store global styles.
+ *
+ * Deliberately plain: no UI kit, and no prefers-color-scheme override. The
+ * pages must look identical in every environment so that any visual diff seen
+ * during A/B script QA is caused by the script, never by the browser.
+ */
+
+:root {
+  --ods-ink: #0f172a;
+  --ods-paper: #ffffff;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--ods-paper);
+  color: var(--ods-ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+/*
+ * /gallery -> #bg-hero
+ * Background image applied through a CSS class (not an <img> src), so the
+ * script has to override it with a stylesheet rule rather than an attribute.
+ */
+.bg-hero-image {
+  background-image: url("https://picsum.photos/seed/ods-bg-hero/1600/900");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Product card star-rating marks. */
+.card-star {
+  color: #d1d5db;
+}
+
+.card-star.is-filled {
+  color: #f59e0b;
+}
