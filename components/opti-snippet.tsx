@@ -39,10 +39,10 @@ const STYLE_CONTENT = `body{opacity:0!important}`;
  */
 const INLINE_SCRIPT_CONTENT = `window.optimeleon=window.optimeleon||function(){(optimeleon.q=optimeleon.q||[]).push(arguments);return{ok:true,verb:String(arguments[0]||''),error:'queued'}};window.__opti_bus="__opti_capture";window.__opti_capture=window.__opti_capture||function(){(__opti_capture.q=__opti_capture.q||[]).push(arguments)};setTimeout(function(){var s=document.getElementById('__opti_af');if(s)s.remove()},300);`;
 
-/* Optimeleon edge bundles (staging), site key 3EdkB0S5YJT3. */
-const SCRIPT_SRC_1 = "https://edge-staging.optimeleon.com/b/3EdkB0S5YJT3.js";
+/* Optimeleon edge bundles (staging), site key pFAjbs8VjA2v. */
+const SCRIPT_SRC_1 = "https://edge-staging.optimeleon.com/b/pFAjbs8VjA2v.js";
 
-const SCRIPT_SRC_2 = "https://edge-staging.optimeleon.com/c/3EdkB0S5YJT3.js";
+const SCRIPT_SRC_2 = "https://edge-staging.optimeleon.com/c/pFAjbs8VjA2v.js";
 
 /*
  * Why `itemProp` is on the two async tags
