@@ -16,20 +16,22 @@ Generated from the built HTML by `npm run docs:selectors`. Do not edit by hand �
 
 | order | id | tag | source |
 | --- | --- | --- | --- |
-| 1 | `#opti-snippet-style` | `<style>` | `STYLE_CONTENT` |
-| 2 | `#opti-snippet-inline` | `<script>` | `INLINE_SCRIPT_CONTENT` |
-| 3 | `#opti-snippet-async-1` | `<script async src>` | `SCRIPT_SRC_1` |
-| 4 | `#opti-snippet-async-2` | `<script async src>` | `SCRIPT_SRC_2` |
+| 1 | `#opti-snippet-preconnect` | `<link rel=preconnect>` | `PRECONNECT_HREF` |
+| 2 | `#__opti_af` | `<style>` | `STYLE_CONTENT` |
+| 3 | `#opti-snippet-inline` | `<script>` | `INLINE_SCRIPT_CONTENT` |
+| 4 | `#opti-snippet-async-1` | `<script async src>` | `SCRIPT_SRC_1` |
+| 5 | `#opti-snippet-async-2` | `<script async src>` | `SCRIPT_SRC_2` |
 
-Paste real values into the four constants at the top of that file. The order above is asserted by `npm run check:targets`.
+Paste real values into the five constants at the top of that file. The order above is asserted by `npm run check:targets`.
 
-One caveat worth knowing: Next.js flushes its own framework tags — the stylesheet `<link>`, image preloads and the bundle's async chunks — into the `<head>` preamble ahead of any head children. Nothing rendered from the React tree can precede them. The snippet is the first thing in `<head>` that the application controls, and the relative order of its own four tags is exact.
+One caveat worth knowing: Next.js flushes its own framework tags — the stylesheet `<link>`, image preloads and the bundle's async chunks — into the `<head>` preamble ahead of any head children. Nothing rendered from the React tree can precede them. The snippet is the first thing in `<head>` that the application controls, and the relative order of its own five tags is exact.
 
 ## Global — header and footer, present on every page
 
 | id | tag | visible text |
 | --- | --- | --- |
-| `#opti-snippet-style` | `<style>` | _(no text)_ |
+| `#opti-snippet-preconnect` | `<link>` | _(no text)_ |
+| `#__opti_af` | `<style>` | _(no text)_ |
 | `#opti-snippet-inline` | `<script>` | _(no text)_ |
 | `#opti-snippet-async-1` | `<script>` | _(no text)_ |
 | `#opti-snippet-async-2` | `<script>` | _(no text)_ |
@@ -69,7 +71,7 @@ Nav links carry `.nav-link`, and the active one also carries `.is-active`.
 
 The scale page. One hundred product cards, twenty testimonials, a twenty-item accordion, an auto-rotating carousel and a countdown that ticks every second. Every product title and every product description on this page is unique, so a title is safe to use as a text anchor.
 
-**3137 elements** in the server HTML, **326 page-specific ids** plus the 32 global ids below.
+**3136 elements** in the server HTML, **326 page-specific ids** plus the 33 global ids below.
 
 ### Unique ids
 
@@ -520,7 +522,7 @@ Inner classes: `.testimonial-quote`, `.testimonial-footer`, `.testimonial-avatar
 
 Image handling. Every image is a plain `<img>` or `<picture>` — never `next/image` — so `src` and `srcset` are exactly as authored and a rewrite is visible in the attribute. Covers an eager hero, an art-directed `<picture>`, twelve lazy images, a CSS background image and an image that mounts late.
 
-**133 elements** in the server HTML, **45 page-specific ids** plus the 32 global ids below.
+**134 elements** in the server HTML, **45 page-specific ids** plus the 33 global ids below.
 
 ### Unique ids
 
@@ -605,7 +607,7 @@ Inner classes: `.lazy-img`, `.lazy-caption`
 
 Section add / remove / move. Eight sibling `<section>` elements, each with a distinct background colour, so reordering or removing one is obvious in a screenshot without reading any copy. Document order is: hero, benefits, how, pricing, testimonials, faq, guarantee, cta.
 
-**200 elements** in the server HTML, **55 page-specific ids** plus the 32 global ids below.
+**201 elements** in the server HTML, **55 page-specific ids** plus the 33 global ids below.
 
 ### Unique ids
 
@@ -738,7 +740,7 @@ Inner classes: `.section-testimonial-quote`, `.section-testimonial-author`
 
 Late render. The shell is server-rendered and paints immediately; everything inside `#slow-content` mounts 1200 ms after hydration, replacing `#slow-placeholder`.
 
-**80 elements** in the server HTML, **6 page-specific ids** plus the 32 global ids below.
+**81 elements** in the server HTML, **6 page-specific ids** plus the 33 global ids below.
 
 ### Unique ids
 
@@ -771,7 +773,7 @@ These replace `#slow-placeholder` 1200 ms after hydration. Until then they do no
 
 The off-campaign page. Deliberately has no test targets beyond the global header and footer: use it to confirm a campaign scoped elsewhere does not fire here.
 
-**75 elements** in the server HTML, **0 page-specific ids** plus the 32 global ids below.
+**76 elements** in the server HTML, **0 page-specific ids** plus the 33 global ids below.
 
 ### Unique ids
 

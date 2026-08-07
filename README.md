@@ -16,11 +16,12 @@ npm run dev          # http://localhost:3000
 
 ## Where to paste the snippet
 
-`components/opti-snippet.tsx`. Four constants at the top of the file:
+`components/opti-snippet.tsx`. Five constants at the top of the file:
 
 | constant | renders as |
 | --- | --- |
-| `STYLE_CONTENT` | inline `<style id="opti-snippet-style">` |
+| `PRECONNECT_HREF` | `<link rel="preconnect" id="opti-snippet-preconnect">` |
+| `STYLE_CONTENT` | inline `<style id="__opti_af">` |
 | `INLINE_SCRIPT_CONTENT` | inline `<script id="opti-snippet-inline">` |
 | `SCRIPT_SRC_1` | `<script async src id="opti-snippet-async-1">` |
 | `SCRIPT_SRC_2` | `<script async src id="opti-snippet-async-2">` |
@@ -29,19 +30,24 @@ The component is the first child of `<head>` in `app/layout.tsx`, renders on the
 server into the initial HTML, and deliberately does **not** use `next/script`,
 which would reorder and defer the tags.
 
-Until real URLs are pasted in, the two async tags point at
-`public/opti-snippet-placeholder-*.js`, which do nothing but set a global and
-log, so you can watch the load order in the network panel.
+The style tag's id is load-bearing: the inline bootstrap removes the
+anti-flicker rule by `document.getElementById('__opti_af')`, so renaming it
+leaves the page blank.
+
+`public/opti-snippet-placeholder-*.js` are kept around for the case where you
+want the async tags pointed at something local — they do nothing but set a
+global and log, so you can watch the load order in the network panel.
 
 ### Two things to know about `<head>` ordering
 
-**React 19 wanted to reorder these tags.** It treats `<script async src>` as a
-hoistable resource and lifts it near the top of `<head>` — which would have put
-both async scripts *before* the inline bootstrap script. The `itemProp`
-attribute on those two tags is React's own documented opt-out from resource
-hoisting, on both the server and the client renderer. It is why the four tags
-come out in the order you wrote them. `npm run check:targets` asserts that
-order, so a React upgrade that changes this behaviour fails loudly.
+**React 19 wanted to reorder these tags.** It treats `<script async src>` and
+`<link rel="preconnect">` as hoistable resources and lifts them near the top of
+`<head>` — which would have put both async scripts *before* the inline
+bootstrap script. The `itemProp` attribute on those three tags is React's own
+documented opt-out from resource hoisting, on both the server and the client
+renderer. It is why the five tags come out in the order you wrote them.
+`npm run check:targets` asserts that order, so a React upgrade that changes this
+behaviour fails loudly.
 
 **Next.js still emits its own tags first.** The stylesheet `<link>`, image
 preloads and the framework's own async chunks are flushed into the `<head>`
