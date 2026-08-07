@@ -270,16 +270,15 @@ doc.push(
     table(
       ["order", "id", "tag", "source"],
       [
-        ["1", "`#opti-snippet-preconnect`", "`<link rel=preconnect>`", "`PRECONNECT_HREF`"],
-        ["2", "`#__opti_af`", "`<style>`", "`STYLE_CONTENT`"],
-        ["3", "`#opti-snippet-inline`", "`<script>`", "`INLINE_SCRIPT_CONTENT`"],
-        ["4", "`#opti-snippet-async-1`", "`<script async src>`", "`SCRIPT_SRC_1`"],
-        ["5", "`#opti-snippet-async-2`", "`<script async src>`", "`SCRIPT_SRC_2`"],
+        ["1", "`#__opti_af`", "`<style>`", "`STYLE_CONTENT`"],
+        ["2", "`#opti-snippet-inline`", "`<script>`", "`INLINE_SCRIPT_CONTENT`"],
+        ["3", "`#opti-snippet-async-1`", "`<script async src>`", "`SCRIPT_SRC_1`"],
+        ["4", "`#opti-snippet-async-2`", "`<script async src>`", "`SCRIPT_SRC_2`"],
       ],
     ),
-    "Paste real values into the five constants at the top of that file. The order above is asserted by `npm run check:targets`.",
+    "Paste real values into the four constants at the top of that file. The order above is asserted by `npm run check:targets`.",
     "",
-    "One caveat worth knowing: Next.js flushes its own framework tags — the stylesheet `<link>`, image preloads and the bundle's async chunks — into the `<head>` preamble ahead of any head children. Nothing rendered from the React tree can precede them. The snippet is the first thing in `<head>` that the application controls, and the relative order of its own five tags is exact.",
+    "One caveat worth knowing: Next.js flushes its own framework tags — the stylesheet `<link>`, image preloads and the bundle's async chunks — into the `<head>` preamble ahead of any head children. Nothing rendered from the React tree can precede them. The snippet is the first thing in `<head>` that the application controls, and the relative order of its own four tags is exact.",
   ].join("\n") + "\n",
 );
 

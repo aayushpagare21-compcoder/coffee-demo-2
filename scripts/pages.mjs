@@ -113,9 +113,8 @@ export const CLIENT_ONLY_CLASSES = new Set([
   "is-added", // added to .card-cta once the button is clicked
 ]);
 
-/** The five snippet tags, in the order they must appear inside <head>. */
+/** The four snippet tags, in the order they must appear inside <head>. */
 export const SNIPPET_ORDER = [
-  "opti-snippet-preconnect",
   "__opti_af",
   "opti-snippet-inline",
   "opti-snippet-async-1",

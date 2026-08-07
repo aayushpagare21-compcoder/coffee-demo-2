@@ -16,11 +16,10 @@ npm run dev          # http://localhost:3000
 
 ## Where to paste the snippet
 
-`components/opti-snippet.tsx`. Five constants at the top of the file:
+`components/opti-snippet.tsx`. Four constants at the top of the file:
 
 | constant | renders as |
 | --- | --- |
-| `PRECONNECT_HREF` | `<link rel="preconnect" id="opti-snippet-preconnect">` |
 | `STYLE_CONTENT` | inline `<style id="__opti_af">` |
 | `INLINE_SCRIPT_CONTENT` | inline `<script id="opti-snippet-inline">` |
 | `SCRIPT_SRC_1` | `<script async src id="opti-snippet-async-1">` |
@@ -34,18 +33,23 @@ The style tag's id is load-bearing: the inline bootstrap removes the
 anti-flicker rule by `document.getElementById('__opti_af')`, so renaming it
 leaves the page blank.
 
+The `nowprocket` and `data-no-minify="1"` attributes are carried over verbatim
+from the snippet Optimeleon hands out. They do nothing in a Next app — they are
+opt-out markers for WordPress optimisation plugins — but the fixture renders the
+shipped snippet as-is, so they stay.
+
 `public/opti-snippet-placeholder-*.js` are kept around for the case where you
 want the async tags pointed at something local — they do nothing but set a
 global and log, so you can watch the load order in the network panel.
 
 ### Two things to know about `<head>` ordering
 
-**React 19 wanted to reorder these tags.** It treats `<script async src>` and
-`<link rel="preconnect">` as hoistable resources and lifts them near the top of
-`<head>` — which would have put both async scripts *before* the inline
-bootstrap script. The `itemProp` attribute on those three tags is React's own
-documented opt-out from resource hoisting, on both the server and the client
-renderer. It is why the five tags come out in the order you wrote them.
+**React 19 wanted to reorder these tags.** It treats `<script async src>` as a
+hoistable resource and lifts it near the top of `<head>` — which would have put
+both async scripts *before* the inline bootstrap script. The `itemProp`
+attribute on those two tags is React's own documented opt-out from resource
+hoisting, on both the server and the client renderer. It is why the four tags
+come out in the order you wrote them.
 `npm run check:targets` asserts that order, so a React upgrade that changes this
 behaviour fails loudly.
 
