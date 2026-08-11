@@ -6,8 +6,9 @@
  * Asserts, against the prerendered HTML of every route:
  *   1. `/` carries at least 3000 elements
  *   2. every promised id exists, exactly once
- *   3. late-mounting ids are absent from the server HTML
- *   4. the four snippet tags appear inside <head> in the required order
+ *   3. late-mounting ids (and the runtime-injected `__opti_af` style)
+ *      are absent from the server HTML
+ *   4. the three snippet tags appear inside <head> in the required order
  *   5. every semantic class in scripts/pages.mjs is actually used somewhere
  */
 
@@ -21,6 +22,7 @@ import {
   GLOBAL_IDS,
   MEGA_PAGE_MIN_ELEMENTS,
   PAGES,
+  SNIPPET_CLIENT_INJECTED_IDS,
   SNIPPET_ORDER,
 } from "./pages.mjs";
 
@@ -52,7 +54,10 @@ for (const page of PAGES) {
     );
   }
 
-  const leaked = (CLIENT_ONLY_IDS[page.route] ?? []).filter((id) => idSet.has(id));
+  const leaked = [
+    ...SNIPPET_CLIENT_INJECTED_IDS,
+    ...(CLIENT_ONLY_IDS[page.route] ?? []),
+  ].filter((id) => idSet.has(id));
   if (leaked.length) {
     failures.push(
       `${page.route}: client-only id(s) present in server HTML: ${leaked.join(", ")}`,

@@ -16,11 +16,10 @@ npm run dev          # http://localhost:3000
 
 ## Where to paste the snippet
 
-`components/opti-snippet.tsx`. Four constants at the top of the file:
+`components/opti-snippet.tsx`. Three constants at the top of the file:
 
 | constant | renders as |
 | --- | --- |
-| `STYLE_CONTENT` | inline `<style id="__opti_af">` |
 | `INLINE_SCRIPT_CONTENT` | inline `<script id="opti-snippet-inline">` |
 | `SCRIPT_SRC_1` | `<script async src id="opti-snippet-async-1">` |
 | `SCRIPT_SRC_2` | `<script async src id="opti-snippet-async-2">` |
@@ -29,9 +28,15 @@ The component is the first child of `<head>` in `app/layout.tsx`, renders on the
 server into the initial HTML, and deliberately does **not** use `next/script`,
 which would reorder and defer the tags.
 
-The style tag's id is load-bearing: the inline bootstrap removes the
-anti-flicker rule by `document.getElementById('__opti_af')`, so renaming it
-leaves the page blank.
+There is no `<style>` tag to paste any more (snippet v2). The inline bootstrap
+injects the anti-flicker rule — `<style id="__opti_af">`,
+`body{opacity:0!important}` — into `<head>` itself, removes it after a 300 ms
+failsafe, and for its first 10 seconds a MutationObserver re-removes the style
+if anything re-inserts it. `window.__opti_af_v` makes the injection idempotent
+if the snippet runs twice, and the whole block is wrapped in `try/catch` so a
+failure degrades to "no anti-flicker", never a blank page. Because the style
+exists only in the browser, `npm run check:targets` asserts `#__opti_af` is
+*absent* from the server HTML.
 
 The `nowprocket` and `data-no-minify="1"` attributes are carried over verbatim
 from the snippet Optimeleon hands out. They do nothing in a Next app — they are
@@ -48,7 +53,7 @@ global and log, so you can watch the load order in the network panel.
 hoistable resource and lifts it near the top of `<head>` — which would have put
 both async scripts *before* the inline bootstrap script. The `itemProp`
 attribute on those two tags is React's own documented opt-out from resource
-hoisting, on both the server and the client renderer. It is why the four tags
+hoisting, on both the server and the client renderer. It is why the three tags
 come out in the order you wrote them.
 `npm run check:targets` asserts that order, so a React upgrade that changes this
 behaviour fails loudly.
@@ -117,11 +122,15 @@ installed, React logs:
 > A tree hydrated but some attributes of the server rendered HTML didn't match
 > the client properties.
 
-That is the extension injecting its anti-flicker `<style>` into `<head>` before
-React hydrates, which shifts the head children React is trying to match. It is
-worth knowing because **a snippet that injects into `<head>` before hydration
-will do the same thing to any Next.js site**. Injecting after hydration, or into
-`<body>`, does not trip it.
+That is the extension mutating `<head>` before React hydrates — typically
+adding attributes to tags React owns, which is what the warning is about.
+
+Note that the v2 snippet's own bootstrap also touches `<head>` before
+hydration: it injects `<style id="__opti_af">` at parse time. React 19 skips
+over *unexpected tags* in `<head>` and `<body>` while hydrating (a documented
+React 19 behaviour, added exactly for extension- and snippet-injected tags), so
+this injection does not by itself produce the warning — attribute changes on
+React-owned tags still do.
 
 The site itself produces no hydration warnings. Verify in a clean profile with
 extensions disabled.
