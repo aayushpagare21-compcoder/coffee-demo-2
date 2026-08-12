@@ -120,10 +120,7 @@ export const CLIENT_ONLY_CLASSES = new Set([
  */
 export const SNIPPET_ORDER = [
   "opti-snippet-consent",
-  "opti-snippet-v1-inline",
-  "opti-snippet-v2-inline",
-  "opti-snippet-async-1",
-  "opti-snippet-async-2",
+  "opti-snippet-inline",
 ];
 
 /**
@@ -132,7 +129,7 @@ export const SNIPPET_ORDER = [
  * fails if one leaks into the server output. Empty while no snippet is
  * pasted.
  */
-export const SNIPPET_CLIENT_INJECTED_IDS = ["optimeleon-overlay", "__opti_af"];
+export const SNIPPET_CLIENT_INJECTED_IDS = ["optimeleon-overlay"];
 
 /** Rendered by app/layout.tsx, so expected on every route. */
 export const GLOBAL_IDS = [

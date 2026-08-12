@@ -20,26 +20,15 @@ npm run dev          # http://localhost:3000
 `app/layout.tsx`, renders on the server into the initial HTML, and deliberately
 does **not** use `next/script`, which would reorder and defer the tags.
 
-**Currently pasted: BOTH snippet generations, side by side, to QA how they
-interact.** First the v1 pair — the `setOptiCookieConsent` localStorage helper
-(`#opti-snippet-consent`) and the v1 bootstrap (`#opti-snippet-v1-inline`),
-which injects `<style id="optimeleon-overlay">` (2000 ms failsafe via
-`window.rmfk`) and loads the production CDN bundle
-(`cdn.optimeleon.com/oat-xv7aq/…/v1.main.js`). Then the v2 trio — the v2
-bootstrap (`#opti-snippet-v2-inline`, injects `<style id="__opti_af">`, 300 ms
-failsafe plus a 10 s MutationObserver) and two async tags
-(`#opti-snippet-async-1/2`, with the `itemProp` anti-hoisting opt-out) pointing
-at a **local dev edge server** — `http://localhost:8787`, site key
-`PPXZgZc9kll6`.
-
-**The v1-before-v2 order is load-bearing:** both generations guard on
-`window.optimeleon`, and the v1 loader no-ops entirely (its CDN bundle never
-loads) if the v2 stub runs first. With v1 first, v1 wins the global and v2's
-stub defers to it; everything else in both bootstraps runs either way. Also
-note both anti-flicker styles inject, so if no bundle removes them earlier the
-body stays hidden for up to 2 s. The v2 edge server must be running on
-port 8787 for the v2 bundles to load; the v1 CDN bundle loads from production
-regardless.
+**Currently pasted: the v1 snippet** — the `setOptiCookieConsent` localStorage
+helper (`#opti-snippet-consent`) and the v1 bootstrap (`#opti-snippet-inline`),
+which injects `<style id="optimeleon-overlay">` (`body{opacity:0}`, removed via
+`window.rmfk` with a 2000 ms failsafe), stubs `window.optimeleon`, loads the
+production CDN bundle (`cdn.optimeleon.com/oat-xv7aq/…/v1.main.js`) by
+injecting the tag before the first `<script>` in the document, and queues
+`optimeleon("init",true,true)`. Both the anti-flicker style and the CDN tag
+exist only in the browser; `npm run check:targets` asserts
+`#optimeleon-overlay` stays out of the server HTML.
 
 To paste one: return its tags from the component in shipped order, verbatim
 (keep vendor attributes like `data-cookieconsent` or `nowprocket`, even when
