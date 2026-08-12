@@ -118,10 +118,7 @@ export const CLIENT_ONLY_CLASSES = new Set([
  * order they must appear inside <head>. Empty while no snippet is pasted —
  * the mount point renders nothing.
  */
-export const SNIPPET_ORDER = [
-  "opti-snippet-consent",
-  "opti-snippet-inline",
-];
+export const SNIPPET_ORDER = [];
 
 /**
  * Ids a snippet injects into <head> at runtime (anti-flicker styles and the
@@ -129,7 +126,7 @@ export const SNIPPET_ORDER = [
  * fails if one leaks into the server output. Empty while no snippet is
  * pasted.
  */
-export const SNIPPET_CLIENT_INJECTED_IDS = ["optimeleon-overlay"];
+export const SNIPPET_CLIENT_INJECTED_IDS = [];
 
 /** Rendered by app/layout.tsx, so expected on every route. */
 export const GLOBAL_IDS = [

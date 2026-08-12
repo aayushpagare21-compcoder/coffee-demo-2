@@ -20,15 +20,8 @@ npm run dev          # http://localhost:3000
 `app/layout.tsx`, renders on the server into the initial HTML, and deliberately
 does **not** use `next/script`, which would reorder and defer the tags.
 
-**Currently pasted: the v1 snippet** — the `setOptiCookieConsent` localStorage
-helper (`#opti-snippet-consent`) and the v1 bootstrap (`#opti-snippet-inline`),
-which injects `<style id="optimeleon-overlay">` (`body{opacity:0}`, removed via
-`window.rmfk` with a 2000 ms failsafe), stubs `window.optimeleon`, loads the
-production CDN bundle (`cdn.optimeleon.com/oat-xv7aq/…/v1.main.js`) by
-injecting the tag before the first `<script>` in the document, and queues
-`optimeleon("init",true,true)`. Both the anti-flicker style and the CDN tag
-exist only in the browser; `npm run check:targets` asserts
-`#optimeleon-overlay` stays out of the server HTML.
+**No snippet is currently pasted — the component renders nothing, and no
+`opti-*` tags appear in `<head>`.**
 
 To paste one: return its tags from the component in shipped order, verbatim
 (keep vendor attributes like `data-cookieconsent` or `nowprocket`, even when
