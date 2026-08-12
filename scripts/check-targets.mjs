@@ -6,9 +6,10 @@
  * Asserts, against the prerendered HTML of every route:
  *   1. `/` carries at least 3000 elements
  *   2. every promised id exists, exactly once
- *   3. late-mounting ids (and the runtime-injected `optimeleon-overlay`
- *      style) are absent from the server HTML
- *   4. the two snippet tags appear inside <head> in the required order
+ *   3. late-mounting ids (and any runtime-injected snippet ids) are absent
+ *      from the server HTML
+ *   4. the snippet tags, if any are pasted, appear inside <head> in the
+ *      required order
  *   5. every semantic class in scripts/pages.mjs is actually used somewhere
  */
 

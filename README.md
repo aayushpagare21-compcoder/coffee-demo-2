@@ -16,50 +16,31 @@ npm run dev          # http://localhost:3000
 
 ## Where to paste the snippet
 
-`components/opti-snippet.tsx`. Two constants at the top of the file:
+`components/opti-snippet.tsx`. It is the first child of `<head>` in
+`app/layout.tsx`, renders on the server into the initial HTML, and deliberately
+does **not** use `next/script`, which would reorder and defer the tags. **No
+snippet is currently pasted — the component renders nothing.**
 
-| constant | renders as |
-| --- | --- |
-| `CONSENT_SCRIPT_CONTENT` | inline `<script id="opti-snippet-consent">` |
-| `INLINE_SCRIPT_CONTENT` | inline `<script id="opti-snippet-inline">` |
+To paste one: return its tags from the component in shipped order, verbatim
+(keep vendor attributes like `data-cookieconsent` or `nowprocket`, even when
+they are inert in a Next app), give each tag a stable id, list those ids in
+`SNIPPET_ORDER` in `scripts/pages.mjs`, and list any ids the snippet injects at
+runtime (anti-flicker styles and the like) in `SNIPPET_CLIENT_INJECTED_IDS`.
+`npm run verify` then asserts the head order, asserts the runtime-injected ids
+stay out of the server HTML, and regenerates `docs/selectors.md`.
 
-The component is the first child of `<head>` in `app/layout.tsx`, renders on the
-server into the initial HTML, and deliberately does **not** use `next/script`,
-which would reorder and defer the tags.
-
-The v1 snippet ships no `<style>` tag and no `<script async src>` tags of its
-own. The first script exposes `window.setOptiCookieConsent`, which persists a
-consent object to localStorage under `opti_consent`. The second injects the
-anti-flicker rule — `<style id="optimeleon-overlay">`, `body{opacity:0}` — into
-`<head>`, exposes `window.rmfk` to remove it (called after a 2000 ms failsafe),
-stubs `window.optimeleon` so calls made before the bundle lands are queued,
-injects the CDN bundle (`cdn.optimeleon.com/oat-xv7aq/oat-xv7aq/v1.main.js`)
-before the first `<script>` in the document, and queues
-`optimeleon("init",true,true)`. Because the style and the CDN tag exist only in
-the browser, `npm run check:targets` asserts `#optimeleon-overlay` is *absent*
-from the server HTML.
-
-The `type="text/javascript"` and `data-cookieconsent="ignore"` attributes are
-carried over verbatim from the snippet Optimeleon hands out — the latter is
-Cookiebot's marker for scripts that must run regardless of consent — as is the
-inert `async` attribute on the second inline tag. The fixture renders the
-shipped snippet as-is, so they stay.
-
-`public/opti-snippet-placeholder-*.js` are leftovers from snippet variants that
-put `<script async src>` tags directly in the tree — the v1 loader injects its
-own CDN tag, so they are unused here, but they are kept for testing those
-variants locally.
+`public/opti-snippet-placeholder-*.js` are placeholder bundles for pointing a
+snippet's remote script tags at something local — they do nothing but set a
+global and log, so you can watch the load order in the network panel.
 
 ### Two things to know about `<head>` ordering
 
 **React 19 reorders `<script async src>` tags.** It treats them as hoistable
-resources and lifts them near the top of `<head>`; snippet variants that put
-async tags in the tree need the `itemProp` attribute — React's documented
-opt-out from resource hoisting — to keep them below the inline bootstrap. The
-v1 snippet renders only inline scripts, which React never hoists, so no opt-out
-is needed, and the loader-injected CDN tag never passes through React at all.
-`npm run check:targets` asserts the two tags' order, so a React upgrade that
-changes this behaviour fails loudly.
+resources and lifts them near the top of `<head>`; snippets that put async tags
+in the tree need the `itemProp` attribute — React's documented opt-out from
+resource hoisting — to keep them below their inline bootstrap. Inline scripts
+are never hoisted. `npm run check:targets` asserts the pasted tags' order, so a
+React upgrade that changes this behaviour fails loudly.
 
 **Next.js still emits its own tags first.** The stylesheet `<link>`, image
 preloads and the framework's own async chunks are flushed into the `<head>`
@@ -128,12 +109,11 @@ installed, React logs:
 That is the extension mutating `<head>` before React hydrates — typically
 adding attributes to tags React owns, which is what the warning is about.
 
-Note that the v1 snippet's own bootstrap also touches `<head>` before
-hydration: it injects `<style id="optimeleon-overlay">` and the CDN bundle
-`<script>` at parse time. React 19 skips over *unexpected tags* in `<head>` and
-`<body>` while hydrating (a documented React 19 behaviour, added exactly for
-extension- and snippet-injected tags), so these injections do not by themselves
-produce the warning — attribute changes on React-owned tags still do.
+Snippets whose bootstrap injects tags into `<head>` before hydration
+(anti-flicker styles, loader-injected CDN scripts) are safe on React 19, which
+skips over *unexpected tags* in `<head>` and `<body>` while hydrating — a
+documented behaviour added exactly for extension- and snippet-injected tags.
+Attribute changes on React-owned tags still produce the warning.
 
 The site itself produces no hydration warnings. Verify in a clean profile with
 extensions disabled.

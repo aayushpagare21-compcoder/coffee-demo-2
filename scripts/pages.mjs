@@ -113,20 +113,20 @@ export const CLIENT_ONLY_CLASSES = new Set([
   "is-added", // added to .card-cta once the button is clicked
 ]);
 
-/** The two snippet tags, in the order they must appear inside <head>. */
-export const SNIPPET_ORDER = [
-  "opti-snippet-consent",
-  "opti-snippet-inline",
-];
+/**
+ * Ids of the snippet tags pasted in components/opti-snippet.tsx, in the
+ * order they must appear inside <head>. Empty while no snippet is pasted —
+ * the mount point renders nothing.
+ */
+export const SNIPPET_ORDER = [];
 
 /**
- * Injected into <head> by the snippet's inline bootstrap at runtime, on every
- * route. Present in the browser, never in the prerendered HTML — the checker
- * fails if one of these leaks into the server output (e.g. someone pastes an
- * older snippet back in that server-rendered the anti-flicker style). The CDN
- * bundle tag the loader injects carries no id, so only the style is listed.
+ * Ids a snippet injects into <head> at runtime (anti-flicker styles and the
+ * like): present in the browser, never in the prerendered HTML — the checker
+ * fails if one leaks into the server output. Empty while no snippet is
+ * pasted.
  */
-export const SNIPPET_CLIENT_INJECTED_IDS = ["optimeleon-overlay"];
+export const SNIPPET_CLIENT_INJECTED_IDS = [];
 
 /** Rendered by app/layout.tsx, so expected on every route. */
 export const GLOBAL_IDS = [
