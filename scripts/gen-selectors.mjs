@@ -19,6 +19,8 @@ import {
   PAGES,
   ROOT,
   SEMANTIC_CLASSES,
+  SNIPPET_CLIENT_INJECTED_IDS,
+  SNIPPET_ORDER,
 } from "./pages.mjs";
 
 const OUT = join(ROOT, "docs", "selectors.md");
@@ -263,11 +265,34 @@ doc.push(
 );
 
 doc.push("## The snippet mount point\n");
+const snippetState = SNIPPET_ORDER.length
+  ? [
+      "`components/opti-snippet.tsx` renders as the first child of `<head>` in `app/layout.tsx`, in this exact order:",
+      "",
+      table(
+        ["order", "id", "tag"],
+        SNIPPET_ORDER.map((id, i) => {
+          const el = homeById.get(id);
+          const tag =
+            el?.attrs?.src != null ? `\`<${el.tag} async src>\`` : `\`<${el?.tag}>\``;
+          return [String(i + 1), `\`#${id}\``, tag];
+        }),
+      ),
+      "The order above is asserted by `npm run check:targets`" +
+        (SNIPPET_CLIENT_INJECTED_IDS.length
+          ? `, which also asserts the runtime-injected ${SNIPPET_CLIENT_INJECTED_IDS.map(
+              (id) => `\`#${id}\``,
+            ).join(", ")} stays *absent* from the server HTML.`
+          : "."),
+    ]
+  : [
+      "`components/opti-snippet.tsx` is the first child of `<head>` in `app/layout.tsx`. **No snippet is currently pasted** — it renders nothing, and no `opti-*` tags appear in `<head>`.",
+      "",
+      "When a snippet is pasted there, list its tag ids in `SNIPPET_ORDER` in `scripts/pages.mjs` (and any runtime-injected ids in `SNIPPET_CLIENT_INJECTED_IDS`); `npm run check:targets` then asserts their order in `<head>` and their absence from the server HTML respectively.",
+    ];
 doc.push(
   [
-    "`components/opti-snippet.tsx` is the first child of `<head>` in `app/layout.tsx`. **No snippet is currently pasted** — it renders nothing, and no `opti-*` tags appear in `<head>`.",
-    "",
-    "When a snippet is pasted there, list its tag ids in `SNIPPET_ORDER` in `scripts/pages.mjs` (and any runtime-injected ids in `SNIPPET_CLIENT_INJECTED_IDS`); `npm run check:targets` then asserts their order in `<head>` and their absence from the server HTML respectively.",
+    ...snippetState,
     "",
     "One caveat worth knowing: Next.js flushes its own framework tags — the stylesheet `<link>`, image preloads and the bundle's async chunks — into the `<head>` preamble ahead of any head children. Nothing rendered from the React tree can precede them. The mount point is the first thing in `<head>` that the application controls.",
   ].join("\n") + "\n",

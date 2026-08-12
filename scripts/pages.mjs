@@ -118,7 +118,11 @@ export const CLIENT_ONLY_CLASSES = new Set([
  * order they must appear inside <head>. Empty while no snippet is pasted —
  * the mount point renders nothing.
  */
-export const SNIPPET_ORDER = [];
+export const SNIPPET_ORDER = [
+  "opti-snippet-inline",
+  "opti-snippet-async-1",
+  "opti-snippet-async-2",
+];
 
 /**
  * Ids a snippet injects into <head> at runtime (anti-flicker styles and the
@@ -126,7 +130,7 @@ export const SNIPPET_ORDER = [];
  * fails if one leaks into the server output. Empty while no snippet is
  * pasted.
  */
-export const SNIPPET_CLIENT_INJECTED_IDS = [];
+export const SNIPPET_CLIENT_INJECTED_IDS = ["__opti_af"];
 
 /** Rendered by app/layout.tsx, so expected on every route. */
 export const GLOBAL_IDS = [

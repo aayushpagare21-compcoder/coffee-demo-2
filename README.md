@@ -18,8 +18,16 @@ npm run dev          # http://localhost:3000
 
 `components/opti-snippet.tsx`. It is the first child of `<head>` in
 `app/layout.tsx`, renders on the server into the initial HTML, and deliberately
-does **not** use `next/script`, which would reorder and defer the tags. **No
-snippet is currently pasted — the component renders nothing.**
+does **not** use `next/script`, which would reorder and defer the tags.
+
+**Currently pasted:** a three-tag snippet — an inline bootstrap
+(`#opti-snippet-inline`) that stubs `window.optimeleon`, injects the
+anti-flicker `<style id="__opti_af">` at runtime (300 ms failsafe, then a
+MutationObserver re-removes it for 10 s), followed by two async tags
+(`#opti-snippet-async-1/2`, with the `itemProp` anti-hoisting opt-out) pointing
+at a **local dev edge server** — `http://localhost:8787`, site key
+`PPXZgZc9kll6`. The edge server must be running for variants to apply; without
+it the tags 404 and the failsafe reveals the page after 300 ms.
 
 To paste one: return its tags from the component in shipped order, verbatim
 (keep vendor attributes like `data-cookieconsent` or `nowprocket`, even when
