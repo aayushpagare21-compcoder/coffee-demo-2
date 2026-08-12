@@ -11,123 +11,104 @@
  * behaviour we need to avoid when QA-ing a synchronous anti-flicker snippet.
  *
  * Rendered order (do not change):
- *   1. inline <script>
- *   2. <script async src={SCRIPT_SRC_1}>
- *   3. <script async src={SCRIPT_SRC_2}>
+ *   1. inline <script> -- consent helper
+ *   2. inline <script> -- anti-flicker + loader bootstrap
  *
- * Snippet v2 has no server-rendered <style> tag: the inline bootstrap
- * injects the anti-flicker <style id="__opti_af"> itself, at runtime. See
- * INLINE_SCRIPT_CONTENT below.
+ * Snippet v1 puts no <style> tag and no <script async src> tags in the tree:
+ * the bootstrap injects the anti-flicker <style id="optimeleon-overlay"> at
+ * runtime, and its loader stub injects the CDN bundle tag itself. Neither
+ * appears in the server HTML.
  *
  * ==========================================================================
- * PASTE THE REAL VALUES INTO THE THREE CONSTANTS BELOW.
+ * PASTE THE REAL VALUES INTO THE TWO CONSTANTS BELOW.
  * ==========================================================================
  */
 
 /*
- * `nowprocket` and `data-no-minify="1"` ride along on the tags exactly as
- * Optimeleon hands them out. They are inert here -- they are opt-out markers
- * for WordPress optimisation plugins (WP Rocket's defer/combine pass reads
- * `nowprocket`, minifiers read `data-no-minify`) -- but the fixture is meant
- * to render the shipped snippet byte-for-byte, so they stay.
- *
- * TS does not know `nowprocket`; it is not a standard HTML attribute. The
- * augmentation below teaches it to the JSX prop types rather than casting at
- * each call site.
+ * `type="text/javascript"` and `data-cookieconsent="ignore"` ride along on
+ * the tags exactly as Optimeleon hands them out. `data-cookieconsent` is
+ * Cookiebot's marker for scripts that must run regardless of consent state;
+ * the `async` attribute on the second tag is inert (inline scripts cannot be
+ * async) -- but the fixture is meant to render the shipped snippet
+ * byte-for-byte, so they stay.
  */
-declare module "react" {
-  interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
-    nowprocket?: string;
-  }
-}
+
+/*
+ * Consent helper. Exposes window.setOptiCookieConsent, which persists the
+ * given consent object to localStorage under "opti_consent" for the bundle
+ * to read.
+ */
+const CONSENT_SCRIPT_CONTENT = `window.setOptiCookieConsent = function(consent) {
+    localStorage.setItem("opti_consent", JSON.stringify(consent));
+  };`;
 
 /*
  * Inline bootstrap. Runs synchronously, before <body> is parsed:
- *   - stubs window.optimeleon + window.__opti_capture so calls made before
- *     the async bundles land are queued instead of thrown away,
- *   - injects the anti-flicker rule -- <style id="__opti_af"> with
- *     body{opacity:0!important} -- into <head>, so visitors never see the
- *     control paint before the edge script has applied its variant,
- *   - removes that style after 300ms as a failsafe, in case the edge script
- *     is slow or never arrives,
- *   - after the reveal, a MutationObserver re-removes the style if anything
- *     re-inserts it (bfcache restores, other scripts); it watches the whole
- *     document and disconnects after 10s,
- *   - `window.__opti_af_v` (currently 2) makes the injection idempotent if
- *     the snippet runs twice, and the whole block is wrapped in try/catch so
- *     an exotic failure degrades to "no anti-flicker", never a blank page.
+ *   - injects the anti-flicker rule -- <style id="optimeleon-overlay">,
+ *     body{opacity:0} -- into <head>, so visitors never see the control
+ *     paint before the bundle has applied its variant,
+ *   - exposes window.rmfk to remove that style, and calls it after 2000ms
+ *     as a failsafe in case the bundle is slow or never arrives,
+ *   - stubs window.optimeleon (callMethod/queue) so calls made before the
+ *     bundle lands are queued instead of thrown away,
+ *   - injects <script async src=".../v1.main.js"> before the first <script>
+ *     in the document,
+ *   - queues optimeleon("init",true,true).
  *
- * Because the style exists only in the browser, `#__opti_af` must NOT appear
- * in the server HTML -- `npm run check:targets` asserts its absence. The
- * pre-hydration injection is safe on React 19, which skips unexpected tags
- * in <head> while hydrating.
+ * Because the style and the CDN tag exist only in the browser,
+ * `#optimeleon-overlay` must NOT appear in the server HTML -- `npm run
+ * check:targets` asserts its absence. The pre-hydration injection is safe on
+ * React 19, which skips unexpected tags in <head> while hydrating.
  */
-const INLINE_SCRIPT_CONTENT = `window.optimeleon=window.optimeleon||function(){(optimeleon.q=optimeleon.q||[]).push(arguments);return{ok:true,verb:String(arguments[0]||''),error:'queued'}};window.__opti_bus="__opti_capture";window.__opti_capture=window.__opti_capture||function(){(__opti_capture.q=__opti_capture.q||[]).push(arguments)};(function(d,w){try{if(w.__opti_af_v)return;w.__opti_af_v=2;var f,s=d.createElement('style');s.id='__opti_af';s.textContent='body{opacity:0!important}';d.head.appendChild(s);var r=function(){f=1;var e=d.getElementById('__opti_af');if(e)e.remove()};setTimeout(r,300);var o=new MutationObserver(function(){if(f)r()});o.observe(d.documentElement,{childList:true,subtree:true});setTimeout(function(){o.disconnect()},10000)}catch(e){}})(document,window);`;
+const INLINE_SCRIPT_CONTENT = `!(function (h, i, e) {
+  var t = 2000;
+  var n = h.createElement("style");
+  n.id = e;
+  n.innerHTML = "body{opacity:0}";
+  h.head.appendChild(n);
+  i.rmfk = function () {
+    var t = h.getElementById(e);
+    t && t.parentNode.removeChild(t);
+  };
+  setTimeout(i.rmfk, t);
+})(document, window, "optimeleon-overlay");
 
-/* Optimeleon edge bundles (staging), site key pFAjbs8VjA2v. */
-const SCRIPT_SRC_1 = "https://edge-staging.optimeleon.com/b/pFAjbs8VjA2v.js";
-
-const SCRIPT_SRC_2 = "https://edge-staging.optimeleon.com/c/pFAjbs8VjA2v.js";
+!function(e,t,o,n,a,c,i){e.optimeleon||(a=e.optimeleon=function(){a.callMethod?a.callMethod.apply(a,arguments):a.queue.push(arguments)},a.push=a,a.queue=[],(c=t.createElement(o)).async=!0,c.src="https://cdn.optimeleon.com/oat-xv7aq/oat-xv7aq/v1.main.js",c.setAttribute("data-cookieconsent","ignore"),(i=t.getElementsByTagName(o)[0]).parentNode.insertBefore(c,i))}(window,document,"script");
+optimeleon("init",true,true);`;
 
 /*
- * Why `itemProp` is on the two async tags
- * ---------------------------------------
- * React 19 treats `<script async src="...">` as a hoistable *resource*: it
- * lifts the tag out of wherever you wrote it and re-emits it in its own slot
- * near the top of <head>. That would put both async scripts BEFORE the inline
- * <script>, which is exactly backwards -- the inline bootstrap has to run
- * first.
+ * NOTE on <head> ordering: earlier snippet variants put <script async src>
+ * tags in the tree and needed React 19's `itemProp` opt-out to stop the
+ * renderer hoisting them above the inline bootstrap. The v1 snippet renders
+ * only inline scripts, which React never hoists, so no opt-out is needed;
+ * the loader-injected CDN tag never passes through React at all.
  *
- * `itemProp` is React's own opt-out. Both the server renderer and the client
- * renderer short-circuit the resource path when `props.itemProp != null`
- * (react-dom 19.1: `pushScript` in Fizz, `isHostHoistableType` in Fiber, each
- * of which bails on `null != props.itemProp` before any hoisting decision). So
- * the tags render in place, in document order, and hydration agrees with the
- * server HTML. The attribute itself is inert microdata: there is no itemScope
- * on this document.
- *
- * Verified against the built HTML; if you upgrade React, re-check that
- * `#opti-snippet-inline` still precedes `#opti-snippet-async-1`, which still
- * precedes `#opti-snippet-async-2`. `npm run check:targets` asserts exactly
- * that.
- *
- * NOTE on absolute position: Next.js flushes its own framework tags (the
- * stylesheet <link>, image preloads and the bundle's own async chunks) into
- * the <head> preamble before ANY head children. Nothing rendered from the
- * React tree can precede them. This block is the first thing in <head> that
- * the application controls, and, importantly, the relative order of the three
- * tags below is exact.
+ * Next.js still flushes its own framework tags (the stylesheet <link>, image
+ * preloads and the bundle's own async chunks) into the <head> preamble before
+ * ANY head children. Nothing rendered from the React tree can precede them.
+ * This block is the first thing in <head> that the application controls, and
+ * the relative order of the two tags below is exact.
  */
 
 export default function OptiSnippet() {
   return (
     <>
-      {/* 1. inline <script> -- injects and later removes #__opti_af itself */}
+      {/* 1. consent helper */}
+      <script
+        id="opti-snippet-consent"
+        type="text/javascript"
+        data-cookieconsent="ignore"
+        dangerouslySetInnerHTML={{ __html: CONSENT_SCRIPT_CONTENT }}
+      />
+
+      {/* 2. anti-flicker + loader bootstrap -- injects and later removes
+          #optimeleon-overlay itself, and injects the CDN bundle tag */}
       <script
         id="opti-snippet-inline"
-        nowprocket=""
-        data-no-minify="1"
+        type="text/javascript"
+        async
+        data-cookieconsent="ignore"
         dangerouslySetInnerHTML={{ __html: INLINE_SCRIPT_CONTENT }}
-      />
-
-      {/* 2. first async <script src> */}
-      <script
-        id="opti-snippet-async-1"
-        itemProp="opti-snippet"
-        async
-        src={SCRIPT_SRC_1}
-        nowprocket=""
-        data-no-minify="1"
-      />
-
-      {/* 3. second async <script src> */}
-      <script
-        id="opti-snippet-async-2"
-        itemProp="opti-snippet"
-        async
-        src={SCRIPT_SRC_2}
-        nowprocket=""
-        data-no-minify="1"
       />
     </>
   );

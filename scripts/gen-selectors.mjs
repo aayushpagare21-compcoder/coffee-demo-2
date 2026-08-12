@@ -270,16 +270,15 @@ doc.push(
     table(
       ["order", "id", "tag", "source"],
       [
-        ["1", "`#opti-snippet-inline`", "`<script>`", "`INLINE_SCRIPT_CONTENT`"],
-        ["2", "`#opti-snippet-async-1`", "`<script async src>`", "`SCRIPT_SRC_1`"],
-        ["3", "`#opti-snippet-async-2`", "`<script async src>`", "`SCRIPT_SRC_2`"],
+        ["1", "`#opti-snippet-consent`", "`<script>`", "`CONSENT_SCRIPT_CONTENT`"],
+        ["2", "`#opti-snippet-inline`", "`<script>`", "`INLINE_SCRIPT_CONTENT`"],
       ],
     ),
-    "Paste real values into the three constants at the top of that file. The order above is asserted by `npm run check:targets`.",
+    "Paste real values into the two constants at the top of that file. The order above is asserted by `npm run check:targets`.",
     "",
-    'The anti-flicker `<style id="__opti_af">` is no longer a pasted tag: the inline bootstrap injects it into `<head>` at runtime and removes it once the variant has applied (300 ms failsafe). It exists only in the browser — the checker asserts it is *absent* from the server HTML.',
+    'The anti-flicker `<style id="optimeleon-overlay">` is not a pasted tag: the inline bootstrap injects it into `<head>` at runtime and removes it via `window.rmfk` (2000 ms failsafe). The CDN bundle `<script>` is likewise injected by the loader at runtime and carries no id. Both exist only in the browser — the checker asserts the style id is *absent* from the server HTML.',
     "",
-    "One caveat worth knowing: Next.js flushes its own framework tags — the stylesheet `<link>`, image preloads and the bundle's async chunks — into the `<head>` preamble ahead of any head children. Nothing rendered from the React tree can precede them. The snippet is the first thing in `<head>` that the application controls, and the relative order of its own three tags is exact.",
+    "One caveat worth knowing: Next.js flushes its own framework tags — the stylesheet `<link>`, image preloads and the bundle's async chunks — into the `<head>` preamble ahead of any head children. Nothing rendered from the React tree can precede them. The snippet is the first thing in `<head>` that the application controls, and the relative order of its own two tags is exact.",
   ].join("\n") + "\n",
 );
 

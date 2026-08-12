@@ -11,9 +11,10 @@ const nextConfig: NextConfig = {
    * STRICT CSP TEST (commented out on purpose)
    * ----------------------------------------------------------------------
    * Uncomment the block below to check that the snippet still works under a
-   * realistic strict policy. Replace <cdn-host> with the host that serves
-   * SCRIPT_SRC_1 / SCRIPT_SRC_2 in components/opti-snippet.tsx, and swap the
-   * two 'unsafe-inline' entries for the sha256 hashes of STYLE_CONTENT and
+   * realistic strict policy. Replace <cdn-host> with the host that serves the
+   * bundle the bootstrap injects (see INLINE_SCRIPT_CONTENT in
+   * components/opti-snippet.tsx), and swap the two 'unsafe-inline' entries
+   * for the sha256 hashes of CONSENT_SCRIPT_CONTENT and
    * INLINE_SCRIPT_CONTENT once you know their final values:
    *
    *   printf '%s' "$INLINE_SCRIPT_CONTENT" | openssl dgst -sha256 -binary | openssl base64

@@ -1,5 +1,5 @@
 /*
- * Placeholder for SCRIPT_SRC_2 in components/opti-snippet.tsx.
+ * Second placeholder bundle, for snippet variants with two remote tags.
  * See opti-snippet-placeholder-1.js.
  */
 window.__optiSnippetPlaceholder2 = { loadedAt: Date.now() };
