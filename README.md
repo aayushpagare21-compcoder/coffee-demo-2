@@ -20,8 +20,21 @@ npm run dev          # http://localhost:3000
 `app/layout.tsx`, renders on the server into the initial HTML, and deliberately
 does **not** use `next/script`, which would reorder and defer the tags.
 
-**No snippet is currently pasted — the component renders nothing, and no
-`opti-*` tags appear in `<head>`.**
+**Currently pasted: the v3 snippet, on the production edge** — an inline
+bootstrap (`#opti-snippet-inline`, guard `__opti_af_v = 3`) that injects
+`<style id="__opti_af">` at runtime (800 ms failsafe, a 10 s MutationObserver,
+and the reveal function exposed as `window.__opti_af_r`), followed by two async
+tags (`#opti-snippet-async-1/2`, `itemProp` anti-hoisting opt-out) pointing at
+`https://edge.optimeleon.com`, site key `1oQQve2h5Rut`.
+
+One fixture-added tag rides along: the shipped `b` tag carries
+`onerror="window.__opti_af_r&&__opti_af_r()"` (reveal immediately if the bundle
+fails to load), but React drops string `on*` attributes on host elements, so a
+literal `onerror` cannot be server-rendered from JSX. A tiny shim
+(`#opti-snippet-onerror-shim`) right after the async tags assigns the identical
+handler as a DOM property — race-free, because script error events are
+dispatched in a task and cannot fire before the parser executes the next
+synchronous inline script.
 
 To paste one: return its tags from the component in shipped order, verbatim
 (keep vendor attributes like `data-cookieconsent` or `nowprocket`, even when
