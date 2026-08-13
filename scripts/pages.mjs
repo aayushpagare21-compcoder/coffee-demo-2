@@ -119,6 +119,7 @@ export const CLIENT_ONLY_CLASSES = new Set([
  * the mount point renders nothing.
  */
 export const SNIPPET_ORDER = [
+  "opti-snippet-preconnect",
   "opti-snippet-inline",
   "opti-snippet-async-1",
   "opti-snippet-async-2",

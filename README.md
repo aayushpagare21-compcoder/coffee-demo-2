@@ -20,12 +20,16 @@ npm run dev          # http://localhost:3000
 `app/layout.tsx`, renders on the server into the initial HTML, and deliberately
 does **not** use `next/script`, which would reorder and defer the tags.
 
-**Currently pasted: the v3 snippet, on the production edge** — an inline
-bootstrap (`#opti-snippet-inline`, guard `__opti_af_v = 3`) that injects
-`<style id="__opti_af">` at runtime (800 ms failsafe, a 10 s MutationObserver,
-and the reveal function exposed as `window.__opti_af_r`), followed by two async
-tags (`#opti-snippet-async-1/2`, `itemProp` anti-hoisting opt-out) pointing at
-`https://edge.optimeleon.com`, site key `1oQQve2h5Rut`.
+**Currently pasted: the v3 snippet, on the production edge** — a preconnect to
+the assets CDN (`#opti-snippet-preconnect`, `https://assets.optimeleon.com`),
+an inline bootstrap (`#opti-snippet-inline`, guard `__opti_af_v = 3`) that
+injects `<style id="__opti_af">` at runtime (800 ms failsafe, a 10 s
+MutationObserver, and the reveal function exposed as `window.__opti_af_r`),
+followed by two async tags (`#opti-snippet-async-1/2`) pointing at
+`https://edge.optimeleon.com`, site key `1oQQve2h5Rut`. The preconnect and the
+async tags all carry the `itemProp` anti-hoisting opt-out — React 19 treats
+both `<link rel="preconnect">` and `<script async src>` as hoistable
+resources.
 
 One fixture-added tag rides along: the shipped `b` tag carries
 `onerror="window.__opti_af_r&&__opti_af_r()"` (reveal immediately if the bundle
