@@ -11,10 +11,10 @@
  * behaviour we need to avoid when QA-ing a synchronous anti-flicker snippet.
  *
  * Rendered order (do not change):
- *   1. <link rel="preconnect">            -- staging assets CDN warm-up
+ *   1. <link rel="preconnect">            -- assets CDN warm-up
  *   2. inline <script>                    -- v3 bootstrap
- *   3. <script async src={SCRIPT_SRC_1}>  -- staging edge, `b` bundle
- *   4. <script async src={SCRIPT_SRC_2}>  -- staging edge, `c` bundle
+ *   3. <script async src={SCRIPT_SRC_1}>  -- production edge, `b` bundle
+ *   4. <script async src={SCRIPT_SRC_2}>  -- production edge, `c` bundle
  *   5. inline <script>                    -- FIXTURE SHIM, see below
  *
  * Tags 1-4 are the shipped snippet. Tag 5 exists because the shipped `b` tag
@@ -36,30 +36,11 @@
  */
 
 /*
- * `nowprocket` and `data-no-minify="1"` ride along on the three script tags
- * exactly as Optimeleon hands them out. They are inert here -- opt-out
- * markers for WordPress optimisation plugins (WP Rocket's defer/combine pass
- * reads `nowprocket`, minifiers read `data-no-minify`) -- but the fixture
- * renders the shipped snippet byte-for-byte, so they stay. The preconnect
- * link ships without them, and the fixture shim is ours, so neither carries
- * them.
- *
- * TS does not know `nowprocket`; it is not a standard HTML attribute. The
- * augmentation below teaches it to the JSX prop types rather than casting at
- * each call site.
- */
-declare module "react" {
-  interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
-    nowprocket?: string;
-  }
-}
-
-/*
  * Preconnect target: warms up the connection to the assets CDN the edge
  * bundles pull variant media from. The pasted tag carries no crossorigin
  * attribute, so none is rendered.
  */
-const PRECONNECT_HREF = "https://assets.staging.optimeleon.com";
+const PRECONNECT_HREF = "https://assets.optimeleon.com";
 
 /*
  * v3 inline bootstrap. Runs synchronously, before <body> is parsed:
@@ -86,10 +67,10 @@ const PRECONNECT_HREF = "https://assets.staging.optimeleon.com";
  */
 const INLINE_SCRIPT_CONTENT = `window.optimeleon=window.optimeleon||function(){(optimeleon.q=optimeleon.q||[]).push(arguments);return{ok:true,verb:String(arguments[0]||''),error:'queued'}};window.__opti_bus="__opti_capture";window.__opti_capture=window.__opti_capture||function(){(__opti_capture.q=__opti_capture.q||[]).push(arguments)};(function(d,w){try{if(w.__opti_af_v)return;w.__opti_af_v=3;var f,s=d.createElement('style');s.id='__opti_af';s.textContent='body{opacity:0!important}';d.head.appendChild(s);var r=function(){f=1;var e=d.getElementById('__opti_af');if(e)e.remove()};w.__opti_af_r=r;setTimeout(r,800);var o=new MutationObserver(function(){if(f)r()});o.observe(d.documentElement,{childList:true,subtree:true});setTimeout(function(){o.disconnect()},10000)}catch(e){}})(document,window);`;
 
-/* Optimeleon STAGING edge bundles, site key pFAjbs8VjA2v. */
-const SCRIPT_SRC_1 = "https://edge-staging.optimeleon.com/b/pFAjbs8VjA2v.js";
+/* Optimeleon PRODUCTION edge bundles, site key 1oQQve2h5Rut. */
+const SCRIPT_SRC_1 = "https://edge.optimeleon.com/b/1oQQve2h5Rut.js";
 
-const SCRIPT_SRC_2 = "https://edge-staging.optimeleon.com/c/pFAjbs8VjA2v.js";
+const SCRIPT_SRC_2 = "https://edge.optimeleon.com/c/1oQQve2h5Rut.js";
 
 /*
  * Fixture shim standing in for the shipped tag's
@@ -137,8 +118,6 @@ export default function OptiSnippet() {
       {/* 2. inline <script> -- injects and later removes #__opti_af itself */}
       <script
         id="opti-snippet-inline"
-        nowprocket=""
-        data-no-minify="1"
         dangerouslySetInnerHTML={{ __html: INLINE_SCRIPT_CONTENT }}
       />
 
@@ -149,8 +128,6 @@ export default function OptiSnippet() {
         itemProp="opti-snippet"
         async
         src={SCRIPT_SRC_1}
-        nowprocket=""
-        data-no-minify="1"
       />
 
       {/* 4. second async <script src> */}
@@ -159,8 +136,6 @@ export default function OptiSnippet() {
         itemProp="opti-snippet"
         async
         src={SCRIPT_SRC_2}
-        nowprocket=""
-        data-no-minify="1"
       />
 
       {/* 5. fixture shim -- wires onerror onto tag 3, not part of the
