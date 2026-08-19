@@ -71,7 +71,7 @@ Nav links carry `.nav-link`, and the active one also carries `.is-active`.
 
 The scale page. One hundred product cards, twenty testimonials, a twenty-item accordion, an auto-rotating carousel and a countdown that ticks every second. Every product title and every product description on this page is unique, so a title is safe to use as a text anchor.
 
-**3139 elements** in the server HTML, **326 page-specific ids** plus the 33 global ids below.
+**3140 elements** in the server HTML, **326 page-specific ids** plus the 33 global ids below.
 
 ### Unique ids
 

@@ -2,6 +2,7 @@ import { PRODUCTS, TESTIMONIALS } from "@/lib/catalog";
 import { imageUrl } from "@/lib/images";
 import ProductCard from "@/components/product-card";
 import HeroCarousel from "@/components/hero-carousel";
+import HeroCta from "@/components/hero-cta";
 import PromoCountdown from "@/components/promo-countdown";
 import FaqAccordion from "@/components/faq-accordion";
 
@@ -39,13 +40,7 @@ export default function HomePage() {
               stocked for ten years, and a dialling card in every box.
             </p>
             <div id="hero-actions" className="mt-7 flex flex-wrap gap-3">
-              <a
-                id="hero-cta-primary"
-                href="#product-grid"
-                className="rounded bg-slate-900 px-6 py-3 text-sm font-semibold text-white hover:bg-slate-700"
-              >
-                Shop the bench series
-              </a>
+              <HeroCta />
               <a
                 id="hero-cta-secondary"
                 href="#faq-section"
