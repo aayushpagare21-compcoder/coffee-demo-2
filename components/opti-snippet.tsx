@@ -12,7 +12,7 @@
  *
  * Rendered order (do not change):
  *   1. <link rel="preconnect">            -- assets CDN warm-up
- *   2. inline <script>                    -- v3 bootstrap
+ *   2. inline <script>                    -- v4 bootstrap
  *   3. <script async src={SCRIPT_SRC_1}>  -- staging edge, `b` bundle
  *   4. <script async src={SCRIPT_SRC_2}>  -- staging edge, `c` bundle
  *   5. inline <script>                    -- FIXTURE SHIM, see below
@@ -43,7 +43,7 @@
 const PRECONNECT_HREF = "https://assets.staging.optimeleon.com";
 
 /*
- * v3 inline bootstrap. Runs synchronously, before <body> is parsed:
+ * v4 inline bootstrap. Runs synchronously, before <body> is parsed:
  *   - stubs window.optimeleon + window.__opti_capture so calls made before
  *     the async bundles land are queued instead of thrown away,
  *   - injects the anti-flicker rule -- <style id="__opti_af"> with
@@ -65,7 +65,7 @@ const PRECONNECT_HREF = "https://assets.staging.optimeleon.com";
  * pre-hydration injection is safe on React 19, which skips unexpected tags
  * in <head> while hydrating.
  */
-const INLINE_SCRIPT_CONTENT = `window.optimeleon=window.optimeleon||function(){(optimeleon.q=optimeleon.q||[]).push(arguments);return{ok:true,verb:String(arguments[0]||''),error:'queued'}};window.__opti_bus="__opti_capture";window.__opti_capture=window.__opti_capture||function(){(__opti_capture.q=__opti_capture.q||[]).push(arguments)};(function(d,w){try{if(w.__opti_af_v)return;w.__opti_af_v=3;var f,s=d.createElement('style');s.id='__opti_af';s.textContent='body{opacity:0!important}';d.head.appendChild(s);var r=function(){f=1;var e=d.getElementById('__opti_af');if(e)e.remove()};w.__opti_af_r=r;setTimeout(r,800);var o=new MutationObserver(function(){if(f)r()});o.observe(d.documentElement,{childList:true,subtree:true});setTimeout(function(){o.disconnect()},10000)}catch(e){}})(document,window);`;
+const INLINE_SCRIPT_CONTENT = `window.optimeleon=window.optimeleon||function(){(optimeleon.q=optimeleon.q||[]).push(arguments);return{ok:true,verb:String(arguments[0]||''),error:'queued'}};window.__opti_bus="__opti_capture";window.__opti_capture=window.__opti_capture||function(){(__opti_capture.q=__opti_capture.q||[]).push(arguments)};(function(d,w){try{if(w.__opti_af_v)return;w.__opti_af_v=4;var f,s=d.createElement('style');s.id='__opti_af';s.textContent='body{opacity:0!important}';d.head.appendChild(s);var r=function(){f=1;var e=d.getElementById('__opti_af');if(e)e.remove()};w.__opti_af_r=r;setTimeout(r,800);var o=new MutationObserver(function(){if(f)r()});o.observe(d.documentElement,{childList:true,subtree:true});setTimeout(function(){o.disconnect()},10000)}catch(e){}})(document,window);`;
 
 /* Optimeleon STAGING edge bundles, site key rhj6PKHDKMiV. */
 const SCRIPT_SRC_1 = "https://edge-staging.optimeleon.com/b/rhj6PKHDKMiV.js";
@@ -127,6 +127,7 @@ export default function OptiSnippet() {
         id="opti-snippet-async-1"
         itemProp="opti-snippet"
         async
+        crossOrigin="anonymous"
         src={SCRIPT_SRC_1}
       />
 
@@ -135,6 +136,7 @@ export default function OptiSnippet() {
         id="opti-snippet-async-2"
         itemProp="opti-snippet"
         async
+        crossOrigin="anonymous"
         src={SCRIPT_SRC_2}
       />
 

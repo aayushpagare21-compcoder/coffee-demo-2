@@ -20,9 +20,9 @@ npm run dev          # http://localhost:3000
 `app/layout.tsx`, renders on the server into the initial HTML, and deliberately
 does **not** use `next/script`, which would reorder and defer the tags.
 
-**Currently pasted: the v3 snippet, on STAGING** — a preconnect to
+**Currently pasted: the v4 snippet, on STAGING** — a preconnect to
 the assets CDN (`#opti-snippet-preconnect`, `https://assets.staging.optimeleon.com`),
-an inline bootstrap (`#opti-snippet-inline`, guard `__opti_af_v = 3`) that
+an inline bootstrap (`#opti-snippet-inline`, guard `__opti_af_v = 4`) that
 injects `<style id="__opti_af">` at runtime (800 ms failsafe, a 10 s
 MutationObserver, and the reveal function exposed as `window.__opti_af_r`),
 followed by two async tags (`#opti-snippet-async-1/2`) pointing at
