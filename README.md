@@ -20,16 +20,17 @@ npm run dev          # http://localhost:3000
 `app/layout.tsx`, renders on the server into the initial HTML, and deliberately
 does **not** use `next/script`, which would reorder and defer the tags.
 
-**Currently pasted: the v3 snippet, on the production edge** — a preconnect to
-the assets CDN (`#opti-snippet-preconnect`, `https://assets.optimeleon.com`),
-an inline bootstrap (`#opti-snippet-inline`, guard `__opti_af_v = 3`) that
-injects `<style id="__opti_af">` at runtime (800 ms failsafe, a 10 s
-MutationObserver, and the reveal function exposed as `window.__opti_af_r`),
-followed by two async tags (`#opti-snippet-async-1/2`) pointing at
-`https://edge.optimeleon.com`, site key `TnpDpuq7yqBf`. The preconnect and the
-async tags all carry the `itemProp` anti-hoisting opt-out — React 19 treats
-both `<link rel="preconnect">` and `<script async src>` as hoistable
-resources.
+**Currently pasted: the v3 snippet, pointing at a LOCAL edge server through a
+Cloudflare quick tunnel** — an inline bootstrap (`#opti-snippet-inline`, guard
+`__opti_af_v = 3`) that injects `<style id="__opti_af">` at runtime (800 ms
+failsafe, a 10 s MutationObserver, and the reveal function exposed as
+`window.__opti_af_r`), followed by two async tags (`#opti-snippet-async-1/2`,
+`itemProp` anti-hoisting opt-out) pointing at
+`https://scotia-const-friend-visits.trycloudflare.com`, site key
+`uFQqBEfcwywV`. This variant ships no preconnect link. Quick-tunnel hostnames
+are ephemeral — they change whenever the tunnel restarts, so expect to
+re-paste the URLs; when the tunnel is down the tags 404 and the `b` tag's
+onerror reveals the page immediately.
 
 One fixture-added tag rides along: the shipped `b` tag carries
 `onerror="window.__opti_af_r&&__opti_af_r()"` (reveal immediately if the bundle

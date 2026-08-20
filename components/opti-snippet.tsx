@@ -11,13 +11,13 @@
  * behaviour we need to avoid when QA-ing a synchronous anti-flicker snippet.
  *
  * Rendered order (do not change):
- *   1. <link rel="preconnect">            -- assets CDN warm-up
- *   2. inline <script>                    -- v3 bootstrap
- *   3. <script async src={SCRIPT_SRC_1}>  -- production edge, `b` bundle
- *   4. <script async src={SCRIPT_SRC_2}>  -- production edge, `c` bundle
- *   5. inline <script>                    -- FIXTURE SHIM, see below
+ *   1. inline <script>                    -- v3 bootstrap
+ *   2. <script async src={SCRIPT_SRC_1}>  -- tunneled local edge, `b` bundle
+ *   3. <script async src={SCRIPT_SRC_2}>  -- tunneled local edge, `c` bundle
+ *   4. inline <script>                    -- FIXTURE SHIM, see below
  *
- * Tags 1-4 are the shipped snippet. Tag 5 exists because the shipped `b` tag
+ * Tags 1-3 are the shipped snippet (this variant ships no preconnect link).
+ * Tag 4 exists because the shipped `b` tag
  * carries `onerror="window.__opti_af_r&&__opti_af_r()"`, and React refuses to
  * render string event-handler attributes: both renderers (Fizz and Fiber)
  * drop any prop whose name starts with "on" on a host element, so a literal
@@ -34,13 +34,6 @@
  * PASTE THE REAL VALUES INTO THE CONSTANTS BELOW.
  * ==========================================================================
  */
-
-/*
- * Preconnect target: warms up the connection to the assets CDN the edge
- * bundles pull variant media from. The pasted tag carries no crossorigin
- * attribute, so none is rendered.
- */
-const PRECONNECT_HREF = "https://assets.optimeleon.com";
 
 /*
  * v3 inline bootstrap. Runs synchronously, before <body> is parsed:
@@ -67,10 +60,16 @@ const PRECONNECT_HREF = "https://assets.optimeleon.com";
  */
 const INLINE_SCRIPT_CONTENT = `window.optimeleon=window.optimeleon||function(){(optimeleon.q=optimeleon.q||[]).push(arguments);return{ok:true,verb:String(arguments[0]||''),error:'queued'}};window.__opti_bus="__opti_capture";window.__opti_capture=window.__opti_capture||function(){(__opti_capture.q=__opti_capture.q||[]).push(arguments)};(function(d,w){try{if(w.__opti_af_v)return;w.__opti_af_v=3;var f,s=d.createElement('style');s.id='__opti_af';s.textContent='body{opacity:0!important}';d.head.appendChild(s);var r=function(){f=1;var e=d.getElementById('__opti_af');if(e)e.remove()};w.__opti_af_r=r;setTimeout(r,800);var o=new MutationObserver(function(){if(f)r()});o.observe(d.documentElement,{childList:true,subtree:true});setTimeout(function(){o.disconnect()},10000)}catch(e){}})(document,window);`;
 
-/* Optimeleon PRODUCTION edge bundles, site key TnpDpuq7yqBf. */
-const SCRIPT_SRC_1 = "https://edge.optimeleon.com/b/TnpDpuq7yqBf.js";
+/*
+ * LOCAL edge server exposed through a Cloudflare quick tunnel, site key
+ * uFQqBEfcwywV. trycloudflare.com quick-tunnel hostnames are ephemeral --
+ * they change every time the tunnel restarts, so expect to re-paste these
+ * URLs; when the tunnel is down the tags 404 and the `b` tag's onerror
+ * (wired by the fixture shim) reveals the page immediately.
+ */
+const SCRIPT_SRC_1 = "https://scotia-const-friend-visits.trycloudflare.com/b/uFQqBEfcwywV.js";
 
-const SCRIPT_SRC_2 = "https://edge.optimeleon.com/c/TnpDpuq7yqBf.js";
+const SCRIPT_SRC_2 = "https://scotia-const-friend-visits.trycloudflare.com/c/uFQqBEfcwywV.js";
 
 /*
  * Fixture shim standing in for the shipped tag's
@@ -80,49 +79,40 @@ const SCRIPT_SRC_2 = "https://edge.optimeleon.com/c/TnpDpuq7yqBf.js";
 const ONERROR_SHIM_CONTENT = `document.getElementById('opti-snippet-async-1').onerror=function(){window.__opti_af_r&&__opti_af_r()};`;
 
 /*
- * Why `itemProp` is on the preconnect and the two async tags
- * ---------------------------------------------------------
- * React 19 treats `<link rel="preconnect">` and `<script async src="...">`
- * as hoistable *resources*: it lifts each tag out of wherever you wrote it
- * and re-emits it in its own slot near the top of <head> -- which would put
- * both async scripts BEFORE the inline bootstrap. `itemProp` is React's own
- * opt-out: both renderers short-circuit the resource path when
- * `props.itemProp != null` (react-dom 19.1: `pushLink`/`pushScript` in Fizz,
- * `isHostHoistableType` in Fiber), so the tags render in place and hydration
- * agrees with the server HTML. The attribute itself is inert microdata:
- * there is no itemScope on this document. Inline scripts are never hoisted,
- * so tags 2 and 5 need no opt-out.
+ * Why `itemProp` is on the two async tags
+ * ---------------------------------------
+ * React 19 treats `<script async src="...">` as a hoistable *resource*: it
+ * lifts each tag out of wherever you wrote it and re-emits it in its own
+ * slot near the top of <head> -- which would put both async scripts BEFORE
+ * the inline bootstrap. `itemProp` is React's own opt-out: both renderers
+ * short-circuit the resource path when `props.itemProp != null` (react-dom
+ * 19.1: `pushScript` in Fizz, `isHostHoistableType` in Fiber), so the tags
+ * render in place and hydration agrees with the server HTML. The attribute
+ * itself is inert microdata: there is no itemScope on this document. Inline
+ * scripts are never hoisted, so tags 1 and 4 need no opt-out.
  *
- * `npm run check:targets` asserts the five-tag order against the built HTML;
+ * `npm run check:targets` asserts the four-tag order against the built HTML;
  * re-check after a React upgrade.
  *
  * NOTE on absolute position: Next.js flushes its own framework tags (the
  * stylesheet <link>, image preloads and the bundle's own async chunks) into
  * the <head> preamble before ANY head children. Nothing rendered from the
  * React tree can precede them. This block is the first thing in <head> that
- * the application controls, and the relative order of the five tags below is
+ * the application controls, and the relative order of the four tags below is
  * exact.
  */
 
 export default function OptiSnippet() {
   return (
     <>
-      {/* 1. <link rel="preconnect"> */}
-      <link
-        id="opti-snippet-preconnect"
-        itemProp="opti-snippet"
-        rel="preconnect"
-        href={PRECONNECT_HREF}
-      />
-
-      {/* 2. inline <script> -- injects and later removes #__opti_af itself */}
+      {/* 1. inline <script> -- injects and later removes #__opti_af itself */}
       <script
         id="opti-snippet-inline"
         dangerouslySetInnerHTML={{ __html: INLINE_SCRIPT_CONTENT }}
       />
 
-      {/* 3. first async <script src> -- its error handler is wired by the
-          shim in tag 5 */}
+      {/* 2. first async <script src> -- its error handler is wired by the
+          shim in tag 4 */}
       <script
         id="opti-snippet-async-1"
         itemProp="opti-snippet"
@@ -130,7 +120,7 @@ export default function OptiSnippet() {
         src={SCRIPT_SRC_1}
       />
 
-      {/* 4. second async <script src> */}
+      {/* 3. second async <script src> */}
       <script
         id="opti-snippet-async-2"
         itemProp="opti-snippet"
@@ -138,7 +128,7 @@ export default function OptiSnippet() {
         src={SCRIPT_SRC_2}
       />
 
-      {/* 5. fixture shim -- wires onerror onto tag 3, not part of the
+      {/* 4. fixture shim -- wires onerror onto tag 2, not part of the
           shipped snippet */}
       <script
         id="opti-snippet-onerror-shim"
