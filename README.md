@@ -20,16 +20,16 @@ npm run dev          # http://localhost:3000
 `app/layout.tsx`, renders on the server into the initial HTML, and deliberately
 does **not** use `next/script`, which would reorder and defer the tags.
 
-**Currently pasted: the v3 snippet, pointing at a LOCAL edge server** — an
-inline bootstrap (`#opti-snippet-inline`, guard
-`__opti_af_v = 3`) that injects `<style id="__opti_af">` at runtime (800 ms
-failsafe, a 10 s MutationObserver, and the reveal function exposed as
-`window.__opti_af_r`), followed by two async tags (`#opti-snippet-async-1/2`,
-`itemProp` anti-hoisting opt-out) pointing at
-`http://localhost:8787`, site key `uFQqBEfcwywV`. This variant ships no
-preconnect link. The edge server must be running on port 8787 for the bundles
-to load; when it is down the tags 404 and the `b` tag's onerror reveals the
-page immediately.
+**Currently pasted: the v3 snippet, on STAGING** — a preconnect to
+the assets CDN (`#opti-snippet-preconnect`, `https://assets.staging.optimeleon.com`),
+an inline bootstrap (`#opti-snippet-inline`, guard `__opti_af_v = 3`) that
+injects `<style id="__opti_af">` at runtime (800 ms failsafe, a 10 s
+MutationObserver, and the reveal function exposed as `window.__opti_af_r`),
+followed by two async tags (`#opti-snippet-async-1/2`) pointing at
+`https://edge-staging.optimeleon.com`, site key `rhj6PKHDKMiV`. The preconnect and the
+async tags all carry the `itemProp` anti-hoisting opt-out — React 19 treats
+both `<link rel="preconnect">` and `<script async src>` as hoistable
+resources.
 
 One fixture-added tag rides along: the shipped `b` tag carries
 `onerror="window.__opti_af_r&&__opti_af_r()"` (reveal immediately if the bundle
