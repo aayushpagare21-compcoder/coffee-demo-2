@@ -12,8 +12,8 @@
  *
  * Rendered order (do not change):
  *   1. inline <script>                    -- v3 bootstrap
- *   2. <script async src={SCRIPT_SRC_1}>  -- tunneled local edge, `b` bundle
- *   3. <script async src={SCRIPT_SRC_2}>  -- tunneled local edge, `c` bundle
+ *   2. <script async src={SCRIPT_SRC_1}>  -- local edge server, `b` bundle
+ *   3. <script async src={SCRIPT_SRC_2}>  -- local edge server, `c` bundle
  *   4. inline <script>                    -- FIXTURE SHIM, see below
  *
  * Tags 1-3 are the shipped snippet (this variant ships no preconnect link).
@@ -61,15 +61,14 @@
 const INLINE_SCRIPT_CONTENT = `window.optimeleon=window.optimeleon||function(){(optimeleon.q=optimeleon.q||[]).push(arguments);return{ok:true,verb:String(arguments[0]||''),error:'queued'}};window.__opti_bus="__opti_capture";window.__opti_capture=window.__opti_capture||function(){(__opti_capture.q=__opti_capture.q||[]).push(arguments)};(function(d,w){try{if(w.__opti_af_v)return;w.__opti_af_v=3;var f,s=d.createElement('style');s.id='__opti_af';s.textContent='body{opacity:0!important}';d.head.appendChild(s);var r=function(){f=1;var e=d.getElementById('__opti_af');if(e)e.remove()};w.__opti_af_r=r;setTimeout(r,800);var o=new MutationObserver(function(){if(f)r()});o.observe(d.documentElement,{childList:true,subtree:true});setTimeout(function(){o.disconnect()},10000)}catch(e){}})(document,window);`;
 
 /*
- * LOCAL edge server exposed through a Cloudflare quick tunnel, site key
- * uFQqBEfcwywV. trycloudflare.com quick-tunnel hostnames are ephemeral --
- * they change every time the tunnel restarts, so expect to re-paste these
- * URLs; when the tunnel is down the tags 404 and the `b` tag's onerror
- * (wired by the fixture shim) reveals the page immediately.
+ * LOCAL edge server on port 8787, site key uFQqBEfcwywV. localhost:8787 must
+ * be running for the bundles to load; when it is down the tags 404 and the
+ * `b` tag's onerror (wired by the fixture shim) reveals the page
+ * immediately.
  */
-const SCRIPT_SRC_1 = "https://scotia-const-friend-visits.trycloudflare.com/b/uFQqBEfcwywV.js";
+const SCRIPT_SRC_1 = "http://localhost:8787/b/uFQqBEfcwywV.js";
 
-const SCRIPT_SRC_2 = "https://scotia-const-friend-visits.trycloudflare.com/c/uFQqBEfcwywV.js";
+const SCRIPT_SRC_2 = "http://localhost:8787/c/uFQqBEfcwywV.js";
 
 /*
  * Fixture shim standing in for the shipped tag's

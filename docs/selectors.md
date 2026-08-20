@@ -69,7 +69,7 @@ Nav links carry `.nav-link`, and the active one also carries `.is-active`.
 
 The scale page. One hundred product cards, twenty testimonials, a twenty-item accordion, an auto-rotating carousel and a countdown that ticks every second. Every product title and every product description on this page is unique, so a title is safe to use as a text anchor.
 
-**3139 elements** in the server HTML, **326 page-specific ids** plus the 32 global ids below.
+**3138 elements** in the server HTML, **326 page-specific ids** plus the 32 global ids below.
 
 ### Unique ids
 
@@ -520,7 +520,7 @@ Inner classes: `.testimonial-quote`, `.testimonial-footer`, `.testimonial-avatar
 
 Image handling. Every image is a plain `<img>` or `<picture>` — never `next/image` — so `src` and `srcset` are exactly as authored and a rewrite is visible in the attribute. Covers an eager hero, an art-directed `<picture>`, twelve lazy images, a CSS background image and an image that mounts late.
 
-**137 elements** in the server HTML, **45 page-specific ids** plus the 32 global ids below.
+**136 elements** in the server HTML, **45 page-specific ids** plus the 32 global ids below.
 
 ### Unique ids
 
@@ -605,7 +605,7 @@ Inner classes: `.lazy-img`, `.lazy-caption`
 
 Section add / remove / move. Eight sibling `<section>` elements, each with a distinct background colour, so reordering or removing one is obvious in a screenshot without reading any copy. Document order is: hero, benefits, how, pricing, testimonials, faq, guarantee, cta.
 
-**204 elements** in the server HTML, **55 page-specific ids** plus the 32 global ids below.
+**203 elements** in the server HTML, **55 page-specific ids** plus the 32 global ids below.
 
 ### Unique ids
 
